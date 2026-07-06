@@ -1,0 +1,25 @@
+[Unit]
+Description=Nexcore Webhook Example receiver
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nexcore-webhook
+Group=nexcore-webhook
+WorkingDirectory=/opt/nexcore-webhook-example
+EnvironmentFile=/opt/nexcore-webhook-example/.env
+ExecStart=/opt/nexcore-webhook-example/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+# If OUTPUT_DIR / STATE_DB_PATH live outside WorkingDirectory, list them here:
+# ReadWritePaths=/var/lib/nexcore-webhook
+
+[Install]
+WantedBy=multi-user.target
