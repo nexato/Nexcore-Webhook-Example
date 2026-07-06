@@ -1,0 +1,16 @@
+# Caddy reverse proxy with automatic HTTPS (Let's Encrypt).
+#
+# Set WEBHOOK_DOMAIN to your public domain (e.g. export WEBHOOK_DOMAIN=hooks.example.com)
+# before `docker compose --profile caddy up -d`.
+#
+# Requirements for auto-TLS:
+#   - a public DNS A/AAAA record for WEBHOOK_DOMAIN pointing at this host
+#   - inbound ports 80 and 443 reachable from the internet (ACME challenge)
+#
+# IMPORTANT: the proxy must pass the request body through UNCHANGED — the webhook
+# signature is an HMAC over the raw bytes. Caddy's reverse_proxy does this by
+# default (no body rewriting); do not add transforms that alter the body.
+
+{$WEBHOOK_DOMAIN} {
+	reverse_proxy app:8000
+}
