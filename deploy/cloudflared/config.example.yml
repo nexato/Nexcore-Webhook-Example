@@ -1,0 +1,24 @@
+# cloudflared tunnel — example configuration
+#
+# A Cloudflare Tunnel gives the receiver a stable public HTTPS hostname WITHOUT
+# opening any inbound ports (cloudflared connects OUTBOUND to Cloudflare). Ideal
+# behind a firewall/NAT.
+#
+# Setup:
+#   1. cloudflared tunnel login
+#   2. cloudflared tunnel create nexcore-webhook      # prints a Tunnel UUID + creds JSON
+#   3. cloudflared tunnel route dns nexcore-webhook hooks.example.com
+#   4. fill in the UUID + hostname below
+#   5. cloudflared tunnel run nexcore-webhook         # or install as a service (see docs)
+
+tunnel: <TUNNEL-UUID>
+credentials-file: /etc/cloudflared/<TUNNEL-UUID>.json
+
+ingress:
+  # Public hostname → the local receiver.
+  # - host install:        http://localhost:8000
+  # - same docker network: http://app:8000
+  - hostname: hooks.example.com
+    service: http://localhost:8000
+  # Required catch-all.
+  - service: http_status:404
