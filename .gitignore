@@ -1,0 +1,22 @@
+# Local credentials & settings — must never be committed
+.settings/
+
+# Environment / secrets
+.env
+
+# Local state & downloaded output
+*.sqlite
+*.sqlite3
+output/
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/

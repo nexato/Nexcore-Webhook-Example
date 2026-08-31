@@ -1,0 +1,56 @@
+# nexcore-webhook-example — Docker Compose
+#
+#   docker compose up -d --build                 # app only (bring your own ingress)
+#   docker compose --profile caddy up -d --build # app + Caddy auto-TLS
+#
+# Real config comes from a local .env (copy .env.example). The container-internal
+# OUTPUT_DIR / STATE_DB_PATH below are fixed to /data and override any .env values.
+
+services:
+  app:
+    build: .
+    image: nexcore-webhook-example
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      OUTPUT_DIR: /data/output
+      STATE_DB_PATH: /data/state.sqlite
+    volumes:
+      # Host ./data holds the downloaded files (./data/output) and state DB.
+      - ./data:/data
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import httpx,sys; sys.exit(0 if httpx.get('http://127.0.0.1:8000/healthz').status_code==200 else 1)
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # Optional reverse proxy with automatic TLS (Let's Encrypt). Enable with:
+  #   docker compose --profile caddy up -d
+  caddy:
+    image: caddy:2
+    profiles: ["caddy"]
+    depends_on:
+      - app
+    environment:
+      WEBHOOK_DOMAIN: ${WEBHOOK_DOMAIN:-}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:
